@@ -1,25 +1,56 @@
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
+import {GoogleApiWrapper, InfoWindow, Marker} from 'google-maps-react';
+import CurrentLocation from './Map';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+
+export class MapContainer extends Component {
+  
+  state = {
+    showingInfoWindow: false,
+    activeMarker:{},
+    selectedPlace:{}
+  };
+
+  onMarkerClick = (props, marker, e) =>
+    this.setState({
+      selectedPlace: props,
+      activeMarker: marker,
+      showingInfoWindow: true
+    });
+
+  onClose = props => {
+    if (this.state.showingInfoWindow) {
+      this.setState({
+        showingInfoWindow: false,
+        activeMarker: null
+      });
+    }
+  };
+  
+
+  render() {
+    return (
+
+      <CurrentLocation
+        centerAroundCurrentLocation
+        google={this.props.google}
+      >
+        <Marker onClick={this.onMarkerClick} name={'Current Location'} />
+        <InfoWindow
+          marker={this.state.activeMarker}
+          visible={this.state.showingInfoWindow}
+          onClose={this.onClose}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+          <div>
+            <h4>{this.state.selectedPlace.name}</h4>
+          </div>
+        </InfoWindow>
+      </CurrentLocation>
+    );
+  }
 }
 
-export default App;
+export default GoogleApiWrapper({
+  apiKey: 'AIzaSyCwDBEH0tTtCb0AM1gV4XkZU07lbOzkJ5E'
+})(MapContainer);
